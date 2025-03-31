@@ -8,7 +8,7 @@ export interface TrussNode {
   x: number;
   y: number;
   support: TrussNodeSupport;
-  load: number | null;
+  load: { x: number; y: number } | null;
 }
 
 // Member represents a bar connecting two nodes
@@ -32,6 +32,7 @@ export type Mode =
 // Settings for load application
 export interface LoadSettings {
   magnitude: number;
+  angle: number; // in degrees
 }
 
 // Results from truss analysis

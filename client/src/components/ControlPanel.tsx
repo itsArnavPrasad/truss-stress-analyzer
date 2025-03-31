@@ -126,11 +126,29 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                   min="0"
                   onChange={(e) => {
                     const val = e.target.value !== '' ? parseFloat(e.target.value) : 0;
-                    setLoadSettings({ magnitude: isNaN(val) ? 0 : val });
+                    setLoadSettings({ ...loadSettings, magnitude: isNaN(val) ? 0 : val });
                   }}
                   className="ml-2 w-20"
                 />
               </div>
+              <div className="flex items-center">
+                <span className="material-icons mr-2">angle</span>
+                <span>Angle (°):</span>
+                <Input
+                  type="number"
+                  value={loadSettings.angle.toString()}
+                  min="0"
+                  max="360"
+                  onChange={(e) => {
+                    const val = e.target.value !== '' ? parseFloat(e.target.value) : 0;
+                    setLoadSettings({ ...loadSettings, angle: isNaN(val) ? 0 : val });
+                  }}
+                  className="ml-2 w-20"
+                />
+              </div>
+              <p className="text-xs text-neutral-500">
+                Angle in degrees, measured from horizontal, counterclockwise (e.g., 0° right, 90° up).
+              </p>
               <Button
                 onClick={() => setMode('applyLoad')}
                 className={`w-full flex items-center justify-center ${getModeButtonClass('applyLoad')} hover:bg-neutral-800 text-white`}

@@ -15,7 +15,6 @@ import {
 } from "@/lib/trussTypes";
 import { calculateTrussForces } from "@/lib/trussAnalysis";
 
-
 export default function Home() {
   // State management
   const [nodes, setNodes] = useState<TrussNode[]>([]);
@@ -25,7 +24,7 @@ export default function Home() {
   const [selectedMember, setSelectedMember] = useState<TrussMember | null>(null);
   const [firstNodeForMember, setFirstNodeForMember] = useState<TrussNode | null>(null);
   const [analysisResults, setAnalysisResults] = useState<AnalysisResults | null>(null);
-  const [loadSettings, setLoadSettings] = useState<LoadSettings>({ magnitude: 10 });
+  const [loadSettings, setLoadSettings] = useState<LoadSettings>({ magnitude: 10, angle: 270 }); // Default to downward load
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [errorModal, setErrorModal] = useState<{ isOpen: boolean, message: string }>({
     isOpen: false, 
@@ -46,36 +45,23 @@ export default function Home() {
     const nodeCount = nodes.length;
     const memberCount = members.length;
 
-    // Count reaction components
     let reactionCount = 0;
     nodes.forEach(node => {
-      if (node.support === 'hinged') reactionCount += 2; // Hinged support has 2 reaction components
-      else if (node.support === 'roller') reactionCount += 1; // Roller support has 1 reaction component
+      if (node.support === 'hinged') reactionCount += 2;
+      else if (node.support === 'roller') reactionCount += 1;
     });
 
     const mrSum = memberCount + reactionCount;
     const twoJValue = 2 * nodeCount;
 
     let determinacy = "Not Calculated";
-    // Only display determinacy if we have nodes, members, and at least one support
     if (nodeCount > 0 && memberCount > 0 && reactionCount > 0) {
-      if (mrSum === twoJValue) {
-        determinacy = "Determinate";
-      } else if (mrSum > twoJValue) {
-        determinacy = "Indeterminate";
-      } else {
-        determinacy = "Unstable";
-      }
+      if (mrSum === twoJValue) determinacy = "Determinate";
+      else if (mrSum > twoJValue) determinacy = "Indeterminate";
+      else determinacy = "Unstable";
     }
 
-    return {
-      nodeCount,
-      memberCount,
-      reactionCount,
-      mrSum,
-      twoJValue,
-      determinacy
-    };
+    return { nodeCount, memberCount, reactionCount, mrSum, twoJValue, determinacy };
   };
 
   // Node and member management functions
@@ -91,7 +77,6 @@ export default function Home() {
   };
 
   const addMember = (node1: TrussNode, node2: TrussNode) => {
-    // Check if member already exists
     const memberExists = members.some(
       m => (m.node1.id === node1.id && m.node2.id === node2.id) || 
            (m.node1.id === node2.id && m.node2.id === node1.id)
@@ -108,23 +93,17 @@ export default function Home() {
   };
 
   const updateNodePosition = (nodeId: string, x: number, y: number) => {
-    // Update the node
     const updatedNodes = nodes.map(node => 
       node.id === nodeId ? { ...node, x, y } : node
     );
     setNodes(updatedNodes);
 
-    // Find the updated node
     const updatedNode = updatedNodes.find(node => node.id === nodeId);
     if (!updatedNode) return;
 
-    // Update all members connected to this node
     setMembers(members.map(member => {
-      if (member.node1.id === nodeId) {
-        return { ...member, node1: updatedNode };
-      } else if (member.node2.id === nodeId) {
-        return { ...member, node2: updatedNode };
-      }
+      if (member.node1.id === nodeId) return { ...member, node1: updatedNode };
+      else if (member.node2.id === nodeId) return { ...member, node2: updatedNode };
       return member;
     }));
   };
@@ -132,8 +111,16 @@ export default function Home() {
   const applyLoadToNode = (nodeId: string) => {
     setNodes(nodes.map(node => {
       if (node.id === nodeId) {
-        // Toggle load: if node already has a load, remove it; otherwise apply positive load
-        return { ...node, load: node.load !== null ? null : Math.abs(loadSettings.magnitude) };
+        if (node.load !== null) {
+          // Remove load
+          return { ...node, load: null };
+        } else {
+          // Apply load with components
+          const theta = loadSettings.angle * Math.PI / 180;
+          const loadX = loadSettings.magnitude * Math.cos(theta);
+          const loadY = -loadSettings.magnitude * Math.sin(theta); // Negative because y increases downward
+          return { ...node, load: { x: loadX, y: loadY } };
+        }
       }
       return node;
     }));
@@ -146,23 +133,15 @@ export default function Home() {
   };
 
   const deleteNode = (nodeId: string) => {
-    // Also delete connected members
-    const newMembers = members.filter(
-      m => m.node1.id !== nodeId && m.node2.id !== nodeId
-    );
+    const newMembers = members.filter(m => m.node1.id !== nodeId && m.node2.id !== nodeId);
     setMembers(newMembers);
     setNodes(nodes.filter(n => n.id !== nodeId));
-
-    if (selectedNode?.id === nodeId) {
-      setSelectedNode(null);
-    }
+    if (selectedNode?.id === nodeId) setSelectedNode(null);
   };
 
   const deleteMember = (memberId: string) => {
     setMembers(members.filter(m => m.id !== memberId));
-    if (selectedMember?.id === memberId) {
-      setSelectedMember(null);
-    }
+    if (selectedMember?.id === memberId) setSelectedMember(null);
   };
 
   const clearAll = () => {
@@ -174,17 +153,14 @@ export default function Home() {
     setAnalysisResults(null);
   };
 
-  // Simple reset view handler to set transform in TrussCanvas
   const resetView = () => {
     const svgElement = document.querySelector('svg');
     if (svgElement) {
-      // Create a custom event to trigger reset in TrussCanvas
       const resetEvent = new CustomEvent('resetView');
       svgElement.dispatchEvent(resetEvent);
     }
   };
 
-  // Analysis function
   const calculateForces = () => {
     if (nodes.length < 2 || members.length < 1) {
       showError("Not enough elements to analyze. Add more nodes and members.");
@@ -193,7 +169,7 @@ export default function Home() {
 
     const hasLoad = nodes.some(node => node.load !== null);
     if (!hasLoad) {
-      showError("No loads defined. Double-click a node to apply a load.");
+      showError("No loads defined. Click a node in 'Apply Load' mode to add a load.");
       return;
     }
 
@@ -203,9 +179,6 @@ export default function Home() {
       return;
     }
 
-    // We'll continue with calculation for both determinate and indeterminate cases
-    // For indeterminate trusses, we'll solve using a method that can handle the extra constraints
-
     try {
       const results = calculateTrussForces(nodes, members);
       setAnalysisResults(results);
@@ -214,16 +187,12 @@ export default function Home() {
     }
   };
 
-  // Modal functions
   const showError = (message: string) => {
     setErrorModal({ isOpen: true, message });
   };
 
   const openAddNodeModal = () => {
-    setCoordinateModalData({
-      isEditing: false,
-      initialValues: { x: 0, y: 0 }
-    });
+    setCoordinateModalData({ isEditing: false, initialValues: { x: 0, y: 0 } });
     setCoordinateModalOpen(true);
   };
 
@@ -231,17 +200,14 @@ export default function Home() {
     setCoordinateModalData({
       isEditing: true,
       nodeId: node.id,
-      // Scale coordinates to be more user-friendly (100x) and flip Y axis
       initialValues: { x: node.x / 100, y: -node.y / 100 }
     });
     setCoordinateModalOpen(true);
   };
 
   const handleCoordinateModalSubmit = (x: number, y: number) => {
-    // Scale coordinates back to internal representation (100x)
     const scaledX = x * 100;
     const scaledY = y * 100;
-
     if (coordinateModalData.isEditing && coordinateModalData.nodeId) {
       updateNodePosition(coordinateModalData.nodeId, scaledX, scaledY);
     } else {
@@ -250,23 +216,11 @@ export default function Home() {
     setCoordinateModalOpen(false);
   };
 
-  const exportTrussToPDF = (nodes: TrussNode[], members: TrussMember[], results: AnalysisResults | null, stats: TrussStats) => {
-    const doc = new jsPDF();
-    doc.text("Truss Analysis Report", 10, 10);
-    // Add more data to the PDF as needed... (nodes, members, results, stats)
-    doc.save("truss_report.pdf");
-  };
-
-
-  // Stats for display
   const stats = calculateStats();
 
   return (
     <div className="flex flex-col h-screen">
-      <Header 
-        onHelpClick={() => setIsHelpModalOpen(true)} 
-      />
-
+      <Header onHelpClick={() => setIsHelpModalOpen(true)} />
       <main className="flex flex-1 overflow-hidden">
         <ControlPanel 
           mode={mode} 
@@ -278,10 +232,8 @@ export default function Home() {
           onClearAll={clearAll}
           onAddNodeByCoordinates={openAddNodeModal}
           onResetView={resetView}
-          analysisResults={analysisResults} // Pass analysisResults to ControlPanel
-          exportTrussToPDF={exportTrussToPDF} // Pass export function
+          analysisResults={analysisResults}
         />
-
         <TrussCanvas 
           nodes={nodes}
           members={members}
@@ -304,19 +256,12 @@ export default function Home() {
           onResetView={resetView}
         />
       </main>
-
-      {/* Modals */}
-      <HelpModal 
-        isOpen={isHelpModalOpen} 
-        onClose={() => setIsHelpModalOpen(false)} 
-      />
-
+      <HelpModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
       <ErrorModal 
         isOpen={errorModal.isOpen} 
         message={errorModal.message} 
         onClose={() => setErrorModal({ isOpen: false, message: '' })} 
       />
-
       <CoordinateInputModal
         isOpen={coordinateModalOpen}
         onClose={() => setCoordinateModalOpen(false)}

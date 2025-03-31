@@ -25,6 +25,7 @@ export type Mode =
   | 'addMember' 
   | 'delete'
   | 'fixedSupport'
+  | 'rollerSupport'
   | 'hingedSupport'
   | 'applyLoad';
 

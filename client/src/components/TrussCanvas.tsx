@@ -291,7 +291,6 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
             onFirstNodeForMemberSet(null);
           }
         }
-        else if (mode === 'fixedSupport') onNodeSupportSet(node.id, 'fixed');
         else if (mode === 'hingedSupport') onNodeSupportSet(node.id, 'hinged');
         else if (mode === 'rollerSupport') onNodeSupportSet(node.id, 'roller');
         else if (mode === 'applyLoad') onNodeLoadApplied(node.id);

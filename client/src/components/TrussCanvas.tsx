@@ -220,16 +220,46 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
         .attr('fill', node === selectedNode ? '#FF9800' : '#424242');
   
       // Supports
+      // if (node.support === 'hinged') {
+      //   group.append('circle').attr('r', 12).attr('fill', 'none').attr('stroke', '#424242').attr('stroke-width', 2);
+      // } else if (node.support === 'roller') {
+      //   group.append('path')
+      //     .attr('d', 'M-10,0 L0,-15 L10,0 Z')
+      //     .attr('fill', 'none').attr('stroke', '#000').attr('stroke-width', 2);
+      //   group.append('circle').attr('cx', -5).attr('cy', 5).attr('r', 3).attr('fill', '#000');
+      //   group.append('circle').attr('cx', 5).attr('cy', 5).attr('r', 3).attr('fill', '#000');
+      // }
       if (node.support === 'hinged') {
-        group.append('circle').attr('r', 12).attr('fill', 'none').attr('stroke', '#424242').attr('stroke-width', 2);
-      } else if (node.support === 'roller') {
+        // Draw a triangle for hinged support (offset downward by 4 pixels)
         group.append('path')
-          .attr('d', 'M-10,0 L0,-15 L10,0 Z')
-          .attr('fill', 'none').attr('stroke', '#000').attr('stroke-width', 2);
-        group.append('circle').attr('cx', -5).attr('cy', 5).attr('r', 3).attr('fill', '#000');
-        group.append('circle').attr('cx', 5).attr('cy', 5).attr('r', 3).attr('fill', '#000');
+          .attr('d', 'M -10,0 L 10,0 L 0,-15 Z')
+          .attr('fill', 'none')
+          .attr('stroke', '#424242')
+          .attr('stroke-width', 2)
+          .attr('transform', 'translate(0,20)');
+      } else if (node.support === 'roller') {
+        // Draw the roller support triangle (offset downward)
+        group.append('path')
+          .attr('d', 'M -10,0 L 0,-15 L 10,0 Z')
+          .attr('fill', 'none')
+          .attr('stroke', '#000')
+          .attr('stroke-width', 2)
+          .attr('transform', 'translate(0,20)');
+        // Draw the roller wheels (offset downward as well)
+        group.append('circle')
+          .attr('cx', -5)
+          .attr('cy', 9)  // original 5 plus 4 pixels offset
+          .attr('r', 3)
+          .attr('fill', '#000')
+          .attr('transform', 'translate(0,15)');
+        group.append('circle')
+          .attr('cx', 5)
+          .attr('cy', 9)  // original 5 plus 4 pixels offset
+          .attr('r', 3)
+          .attr('fill', '#000')
+          .attr('transform', 'translate(0,15)');
       }
-  
+      
       // Loads
       if (node.load) {
         const { x: loadX, y: loadY } = node.load;

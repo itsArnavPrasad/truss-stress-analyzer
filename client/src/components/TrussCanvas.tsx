@@ -207,6 +207,13 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
         .attr('transform', `translate(${node.x}, ${node.y})`)
         .style('cursor', mode === 'select' ? 'move' : 'pointer');
   
+      // Invisible hit area (larger than the visible circle)
+      group.append('circle')
+      .attr('class', 'node-hit-area')
+      .attr('r', 25) // Increase radius here as needed
+      .attr('fill', 'transparent');
+
+
       group.append('circle')
         .attr('class', 'node')
         .attr('r', 8)
@@ -275,16 +282,21 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
         if (mode === 'select') {
           onNodeSelected(node);
           onMemberSelected(null);
-        } else if (mode === 'delete') onNodeDeleted(node.id);
-        else if (mode === 'addMember') {
+        } else if (mode === 'delete') {
+          onNodeDeleted(node.id);
+        } else if (mode === 'addMember') {
           if (!firstNodeForMember) onFirstNodeForMemberSet(node);
           else if (firstNodeForMember.id !== node.id) {
             onMemberAdded(firstNodeForMember, node);
             onFirstNodeForMemberSet(null);
           }
-        } else if (mode === 'hingedSupport') onNodeSupportSet(node.id, 'hinged');
-        else if (mode === 'rollerSupport') onNodeSupportSet(node.id, 'roller');
-        else if (mode === 'applyLoad') onNodeLoadApplied(node.id);
+        } else if (mode === 'hingedSupport') {
+          onNodeSupportSet(node.id, 'hinged');
+        } else if (mode === 'rollerSupport') {
+          onNodeSupportSet(node.id, 'roller');
+        } else if (mode === 'applyLoad') {
+          onNodeLoadApplied(node.id);
+        }
       });
   
       group.on('contextmenu', (event: MouseEvent) => {

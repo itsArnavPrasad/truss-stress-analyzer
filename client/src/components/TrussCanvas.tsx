@@ -98,109 +98,100 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
     if (!svgRef.current) return;
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
-
+  
+    // Layers
     const gridLayer = svg.append('g').attr('class', 'grid-layer');
     const membersLayer = svg.append('g').attr('class', 'members-layer');
     const nodesLayer = svg.append('g').attr('class', 'nodes-layer');
     const labelsLayer = svg.append('g').attr('class', 'labels-layer');
-    const supportGroup = svg.append('g').attr('class', 'support-layer');
-    const reactionForcesGroup = svg.append('g').attr('class', 'reaction-forces-layer');
+    const supportLayer = svg.append('g').attr('class', 'support-layer');
+    const reactionForcesLayer = svg.append('g').attr('class', 'reaction-forces-layer');
     const mainGroup = svg.append('g').attr('class', 'main-group').attr('transform', transform.toString());
-
+  
+    // Draw Grid
     const gridSize = 20;
     const gridWidth = size.width * 3;
     const gridHeight = size.height * 3;
-
+  
     for (let x = -gridWidth; x <= gridWidth; x += gridSize) {
       mainGroup.append('line')
         .attr('class', 'grid-line')
-        .attr('x1', x)
-        .attr('y1', -gridHeight)
-        .attr('x2', x)
-        .attr('y2', gridHeight)
-        .attr('stroke', '#E0E0E0')
-        .attr('stroke-width', 1);
+        .attr('x1', x).attr('y1', -gridHeight)
+        .attr('x2', x).attr('y2', gridHeight)
+        .attr('stroke', '#E0E0E0').attr('stroke-width', 1);
     }
+  
     for (let y = -gridHeight; y <= gridHeight; y += gridSize) {
       mainGroup.append('line')
         .attr('class', 'grid-line')
-        .attr('x1', -gridWidth)
-        .attr('y1', y)
-        .attr('x2', gridWidth)
-        .attr('y2', y)
-        .attr('stroke', '#E0E0E0')
-        .attr('stroke-width', 1);
+        .attr('x1', -gridWidth).attr('y1', y)
+        .attr('x2', gridWidth).attr('y2', y)
+        .attr('stroke', '#E0E0E0').attr('stroke-width', 1);
     }
-
+  
+    // Axis lines
     mainGroup.append('line').attr('x1', 0).attr('y1', -gridHeight).attr('x2', 0).attr('y2', gridHeight).attr('stroke', '#BDBDBD').attr('stroke-width', 2);
     mainGroup.append('line').attr('x1', -gridWidth).attr('y1', 0).attr('x2', gridWidth).attr('y2', 0).attr('stroke', '#BDBDBD').attr('stroke-width', 2);
-
+  
+    // Draw Members
     members.forEach(member => {
-      const color = analysisResults?.memberForces[member.id]
+      const color = analysisResults?.memberForces[member.id] !== undefined
         ? Math.abs(analysisResults.memberForces[member.id]) < 0.001 ? '#44ff44'
           : analysisResults.memberForces[member.id] > 0 ? '#F44336' : '#2196F3'
         : '#424242';
-
-      const memberLine = mainGroup.append('line')
+  
+      const line = mainGroup.append('line')
         .attr('class', 'member')
-        .attr('x1', member.node1.x)
-        .attr('y1', member.node1.y)
-        .attr('x2', member.node2.x)
-        .attr('y2', member.node2.y)
+        .attr('x1', member.node1.x).attr('y1', member.node1.y)
+        .attr('x2', member.node2.x).attr('y2', member.node2.y)
         .attr('stroke', color)
         .attr('stroke-width', member === selectedMember ? 5 : 3)
         .style('cursor', mode === 'select' ? 'pointer' : 'default');
-
-      memberLine.on('click', (event: MouseEvent) => {
+  
+      line.on('click', (event: MouseEvent) => {
         event.stopPropagation();
-        if (mode === 'select') { onMemberSelected(member); onNodeSelected(null); }
-        else if (mode === 'delete') onMemberDeleted(member.id);
+        if (mode === 'select') {
+          onMemberSelected(member);
+          onNodeSelected(null);
+        } else if (mode === 'delete') {
+          onMemberDeleted(member.id);
+        }
       });
-
+  
       const dx = member.node2.x - member.node1.x;
       const dy = member.node2.y - member.node1.y;
       const length = Math.sqrt(dx * dx + dy * dy) / 100;
-      let angle = Math.atan2(dy, dx) * (180 / Math.PI);
-      if (angle < 0) angle += 360;
-
+  
       const midX = (member.node1.x + member.node2.x) / 2;
       const midY = (member.node1.y + member.node2.y) / 2;
       const offsetX = dy * 0.1;
       const offsetY = -dx * 0.1;
-
+  
+      // Length Label
       mainGroup.append('rect')
-        .attr('x', midX + offsetX - 25)
-        .attr('y', midY + offsetY - 10)
-        .attr('width', 50)
-        .attr('height', 20)
-        .attr('fill', 'white')
-        .attr('opacity', 0.8)
-        .attr('rx', 3);
-
+        .attr('x', midX + offsetX - 25).attr('y', midY + offsetY - 10)
+        .attr('width', 50).attr('height', 20)
+        .attr('fill', 'white').attr('opacity', 0.8).attr('rx', 3);
+  
       mainGroup.append('text')
         .attr('class', 'length-label')
-        .attr('x', midX + offsetX)
-        .attr('y', midY + offsetY + 4)
+        .attr('x', midX + offsetX).attr('y', midY + offsetY + 4)
         .attr('text-anchor', 'middle')
         .attr('font-family', '"Roboto Mono", monospace')
         .attr('font-size', '10px')
         .text(`${length.toFixed(2)} m`);
-
-      if (analysisResults && analysisResults.memberForces[member.id] !== undefined) {
+  
+      // Force Label
+      if (analysisResults?.memberForces[member.id] !== undefined) {
         const force = analysisResults.memberForces[member.id];
         mainGroup.append('rect')
-          .attr('x', midX - 25)
-          .attr('y', midY - 10)
-          .attr('width', 50)
-          .attr('height', 20)
-          .attr('fill', 'white')
-          .attr('opacity', 0.8)
-          .attr('rx', 3);
-
+          .attr('x', midX - 25).attr('y', midY - 10)
+          .attr('width', 50).attr('height', 20)
+          .attr('fill', 'white').attr('opacity', 0.8).attr('rx', 3);
+  
         mainGroup.append('text')
           .attr('class', 'force-label')
-          .attr('x', midX)
-          .attr('y', midY + 4)
+          .attr('x', midX).attr('y', midY + 4)
           .attr('text-anchor', 'middle')
           .attr('font-family', '"Roboto Mono", monospace')
           .attr('font-size', '12px')
@@ -208,114 +199,116 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
           .attr('fill', force > 0 ? '#F44336' : '#2196F3');
       }
     });
-
+  
+    // Draw Nodes
     nodes.forEach(node => {
-      const nodeGroup = mainGroup.append('g')
+      const group = mainGroup.append('g')
         .attr('class', 'node-group')
         .attr('transform', `translate(${node.x}, ${node.y})`)
         .style('cursor', mode === 'select' ? 'move' : 'pointer');
-
-      nodeGroup.append('circle')
+  
+      group.append('circle')
         .attr('class', 'node')
         .attr('r', 8)
         .attr('fill', node === selectedNode ? '#FF9800' : '#424242');
-
+  
+      // Supports
       if (node.support === 'hinged') {
-        nodeGroup.append('circle')
-          .attr('r', 12)
-          .attr('fill', 'none')
-          .attr('stroke', '#424242')
-          .attr('stroke-width', 2);
+        group.append('circle').attr('r', 12).attr('fill', 'none').attr('stroke', '#424242').attr('stroke-width', 2);
       } else if (node.support === 'roller') {
-        nodeGroup.append('path')
+        group.append('path')
           .attr('d', 'M-10,0 L0,-15 L10,0 Z')
-          .attr('fill', 'none')
-          .attr('stroke', '#000')
-          .attr('stroke-width', 2);
-        nodeGroup.append('circle').attr('cx', -5).attr('cy', 5).attr('r', 3).attr('fill', '#000');
-        nodeGroup.append('circle').attr('cx', 5).attr('cy', 5).attr('r', 3).attr('fill', '#000');
+          .attr('fill', 'none').attr('stroke', '#000').attr('stroke-width', 2);
+        group.append('circle').attr('cx', -5).attr('cy', 5).attr('r', 3).attr('fill', '#000');
+        group.append('circle').attr('cx', 5).attr('cy', 5).attr('r', 3).attr('fill', '#000');
       }
-
+  
+      // Loads
       if (node.load) {
-        const loadX = node.load.x;
-        const loadY = node.load.y;
-        const magnitude = Math.sqrt(loadX * loadX + loadY * loadY);
+        const { x: loadX, y: loadY } = node.load;
+        const magnitude = Math.sqrt(loadX ** 2 + loadY ** 2);
         if (magnitude > 0) {
           const arrowLength = 30;
           const dx = (loadX / magnitude) * arrowLength;
           const dy = (loadY / magnitude) * arrowLength;
-          nodeGroup.append('line')
-            .attr('x1', 0)
-            .attr('y1', 0)
-            .attr('x2', dx)
-            .attr('y2', dy)
-            .attr('stroke', '#FF9800')
-            .attr('stroke-width', 2);
+          group.append('line')
+            .attr('x1', 0).attr('y1', 0)
+            .attr('x2', dx).attr('y2', dy)
+            .attr('stroke', '#FF9800').attr('stroke-width', 2);
+  
           const arrowHeadSize = 5;
           const angle = Math.atan2(dy, dx);
-          const arrowHeadPoints = [
+          const points = [
             [dx, dy],
             [dx - arrowHeadSize * Math.cos(angle - Math.PI / 6), dy - arrowHeadSize * Math.sin(angle - Math.PI / 6)],
             [dx - arrowHeadSize * Math.cos(angle + Math.PI / 6), dy - arrowHeadSize * Math.sin(angle + Math.PI / 6)]
           ];
-          nodeGroup.append('polygon')
-            .attr('points', arrowHeadPoints.map(p => p.join(',')).join(' '))
+          group.append('polygon')
+            .attr('points', points.map(p => p.join(',')).join(' '))
             .attr('fill', '#FF9800');
-          nodeGroup.append('text')
-            .attr('x', 0)
-            .attr('y', 35)
+  
+          group.append('text')
+            .attr('x', 0).attr('y', 35)
             .attr('text-anchor', 'middle')
             .attr('font-size', '10px')
             .text(`${magnitude.toFixed(2)} kN`);
         }
       }
-
+  
+      // Node Dragging
       if (mode === 'select') {
-        const dragBehavior = d3.drag<SVGGElement, unknown>()
-          .on('start', () => { onNodeSelected(node); onMemberSelected(null); })
-          .on('drag', (event: any) => {
-            const point = d3.pointer(event.sourceEvent, mainGroup.node());
-            onNodePositionUpdated(node.id, point[0], point[1]);
+        const drag = d3.drag<SVGGElement, unknown>()
+          .on('start', () => {
+            onNodeSelected(node);
+            onMemberSelected(null);
+          })
+          .on('drag', (event) => {
+            const [x, y] = d3.pointer(event.sourceEvent, mainGroup.node());
+            onNodePositionUpdated(node.id, x, y);
           });
-        nodeGroup.call(dragBehavior);
+        group.call(drag);
       }
-
-      nodeGroup.on('click', (event: MouseEvent) => {
+  
+      // Node Click Handling
+      group.on('click', (event: MouseEvent) => {
         event.stopPropagation();
-        if (mode === 'select') { onNodeSelected(node); onMemberSelected(null); }
-        else if (mode === 'delete') onNodeDeleted(node.id);
+        if (mode === 'select') {
+          onNodeSelected(node);
+          onMemberSelected(null);
+        } else if (mode === 'delete') onNodeDeleted(node.id);
         else if (mode === 'addMember') {
           if (!firstNodeForMember) onFirstNodeForMemberSet(node);
           else if (firstNodeForMember.id !== node.id) {
             onMemberAdded(firstNodeForMember, node);
             onFirstNodeForMemberSet(null);
           }
-        }
-        else if (mode === 'hingedSupport') onNodeSupportSet(node.id, 'hinged');
+        } else if (mode === 'hingedSupport') onNodeSupportSet(node.id, 'hinged');
         else if (mode === 'rollerSupport') onNodeSupportSet(node.id, 'roller');
         else if (mode === 'applyLoad') onNodeLoadApplied(node.id);
       });
-
-      nodeGroup.on('contextmenu', (event: MouseEvent) => {
+  
+      group.on('contextmenu', (event: MouseEvent) => {
         event.preventDefault();
         event.stopPropagation();
         onNodeLoadApplied(node.id);
       });
-
-      nodeGroup.on('dblclick', (event: MouseEvent) => {
+  
+      group.on('dblclick', (event: MouseEvent) => {
         event.stopPropagation();
         if (mode === 'select' && onEditNodeCoordinates) onEditNodeCoordinates(node);
         else onNodeLoadApplied(node.id);
       });
     });
-
+  
+    // SVG Click - Add Node
     svg.on('click', (event: MouseEvent) => {
       if (mode !== 'addNode') return;
       if ((event.target as Element).closest('.node-group, .member')) return;
       const point = d3.pointer(event, mainGroup.node());
       onNodeAdded(point[0], point[1]);
     });
-
+  
+    // Zoom
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 5])
       .on('zoom', (event: any) => {
@@ -323,94 +316,27 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
         mainGroup.attr('transform', event.transform.toString());
       });
     svg.call(zoom);
-
+  
+    // Temporary Line for Add Member
     if (firstNodeForMember && mode === 'addMember') {
       const mouseMoveHandler = (event: MouseEvent) => {
-        const temporaryLine = mainGroup.select('.temporary-line');
-        if (temporaryLine.empty()) {
+        const [x, y] = d3.pointer(event, mainGroup.node());
+        const tempLine = mainGroup.select('.temporary-line');
+        if (tempLine.empty()) {
           mainGroup.append('line')
             .attr('class', 'temporary-line')
-            .attr('x1', firstNodeForMember.x)
-            .attr('y1', firstNodeForMember.y)
-            .attr('x2', firstNodeForMember.x)
-            .attr('y2', firstNodeForMember.y)
-            .attr('stroke', '#424242')
-            .attr('stroke-width', 2)
-            .attr('stroke-dasharray', '5,5');
+            .attr('stroke', '#999').attr('stroke-width', 2)
+            .attr('x1', firstNodeForMember.x).attr('y1', firstNodeForMember.y)
+            .attr('x2', x).attr('y2', y);
+        } else {
+          tempLine.attr('x2', x).attr('y2', y);
         }
-        const point = d3.pointer(event, mainGroup.node());
-        mainGroup.select('.temporary-line').attr('x2', point[0]).attr('y2', point[1]);
       };
       svg.on('mousemove', mouseMoveHandler);
-      return () => svg.on('mousemove', null);
     }
-
-    reactionForcesGroup.selectAll('*').remove();
-    if (analysisResults && analysisResults.reactionForces) {
-      Object.entries(analysisResults.reactionForces).forEach(([nodeId, forces]) => {
-        const node = nodes.find(n => n.id === nodeId);
-        if (node && node.support) {
-          const arrowLength = 30;
-          const arrowWidth = 6;
-          const arrowColor = '#FF4081';
-          const offset = node.support === 'hinged' ? 20 : 15;
-
-          if (Math.abs(forces.y) > 0.001) {
-            const yDirection = forces.y > 0 ? 1 : -1;
-            const arrow = reactionForcesGroup.append('g').attr('class', 'reaction-force');
-            const startY = node.y + (yDirection === 1 ? -offset : offset);
-            arrow.append('line')
-              .attr('x1', node.x)
-              .attr('y1', startY)
-              .attr('x2', node.x)
-              .attr('y2', startY + yDirection * arrowLength)
-              .attr('stroke', arrowColor)
-              .attr('stroke-width', 2);
-            const arrowHeadY = node.y + yDirection * arrowLength;
-            arrow.append('path')
-              .attr('d', `M${node.x - arrowWidth},${arrowHeadY - yDirection * arrowWidth} L${node.x},${arrowHeadY} L${node.x + arrowWidth},${arrowHeadY - yDirection * arrowWidth}`)
-              .attr('stroke', arrowColor)
-              .attr('fill', 'none')
-              .attr('stroke-width', 2);
-            arrow.append('text')
-              .attr('x', node.x + 10)
-              .attr('y', node.y + yDirection * (arrowLength / 2))
-              .attr('fill', arrowColor)
-              .attr('font-family', 'Arial')
-              .attr('font-size', '14px')
-              .attr('dominant-baseline', 'middle')
-              .text(`${Math.abs(forces.y).toFixed(1)} kN`);
-          }
-
-          if (node.support === 'hinged' && Math.abs(forces.x) > 0.001) {
-            const xDirection = forces.x > 0 ? 1 : -1;
-            const arrow = reactionForcesGroup.append('g').attr('class', 'reaction-force');
-            arrow.append('line')
-              .attr('x1', node.x)
-              .attr('y1', node.y)
-              .attr('x2', node.x + xDirection * arrowLength)
-              .attr('y2', node.y)
-              .attr('stroke', arrowColor)
-              .attr('stroke-width', 2);
-            const arrowHeadX = node.x + xDirection * arrowLength;
-            arrow.append('path')
-              .attr('d', `M${arrowHeadX - xDirection * arrowWidth},${node.y - arrowWidth} L${arrowHeadX},${node.y} L${arrowHeadX - xDirection * arrowWidth},${node.y + arrowWidth}`)
-              .attr('stroke', arrowColor)
-              .attr('fill', 'none')
-              .attr('stroke-width', 2);
-            arrow.append('text')
-              .attr('x', node.x + xDirection * (arrowLength / 2))
-              .attr('y', node.y - 15)
-              .attr('fill', arrowColor)
-              .attr('font-family', 'Arial')
-              .attr('font-size', '14px')
-              .attr('text-anchor', 'middle')
-              .text(`${Math.abs(forces.x).toFixed(1)} kN`);
-          }
-        }
-      });
-    }
-  }, [nodes, members, mode, selectedNode, selectedMember, firstNodeForMember, analysisResults, size, transform, onNodeSelected, onMemberSelected, onNodeAdded, onMemberAdded, onNodePositionUpdated, onNodeDeleted, onMemberDeleted, onNodeSupportSet, onNodeLoadApplied, onFirstNodeForMemberSet, onEditNodeCoordinates]);
+  
+  }, [svgRef, transform, size, members, nodes, analysisResults, mode, selectedNode, selectedMember, firstNodeForMember]);
+  
 
   return (
     <div ref={containerRef} className="flex-1 relative overflow-hidden bg-neutral-100">

@@ -12,7 +12,7 @@ const Header: React.FC<HeaderProps> = ({ onHelpClick }) => {
         <div className="flex items-center space-x-4">
           <button 
             onClick={onHelpClick}
-            className="flex items-center bg-white/20 rounded px-3 py-1 hover:bg-white/30 transition"
+            className="flex items-center bg-neutral-400 rounded px-3 py-1 hover:bg-neutral-800 transition"
           >
             <span className="material-icons mr-1">help_outline</span>
             <span>Help</span>

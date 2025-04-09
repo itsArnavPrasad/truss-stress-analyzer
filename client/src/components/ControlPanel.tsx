@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mode, LoadSettings, TrussStats } from '@/lib/trussTypes';
+import { Mode, LoadSettings, TrussStats, AnalysisResults } from '@/lib/trussTypes';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ interface ControlPanelProps {
   onClearAll: () => void;
   onAddNodeByCoordinates?: () => void;
   onResetView?: () => void;
-  analysisResults?: any;
+  analysisResults?: AnalysisResults;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({

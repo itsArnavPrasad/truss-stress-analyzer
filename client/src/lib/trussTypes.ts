@@ -36,10 +36,16 @@ export interface LoadSettings {
 }
 
 // Results from truss analysis
+export interface ReactionForces {
+  x: number;
+  y: number;
+}
+
 export interface AnalysisResults {
-  memberForces: { [memberId: string]: number };
-  reactionForces: { [nodeId: string]: { x: number; y: number; moment?: number } };
-  isStable: boolean;
+  reactionForces: {
+    [nodeId: string]: ReactionForces;
+  };
+  // Add other analysis result properties if needed
 }
 
 // Statistics for truss structure

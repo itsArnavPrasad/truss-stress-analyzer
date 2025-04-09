@@ -42,10 +42,13 @@ export interface ReactionForces {
 }
 
 export interface AnalysisResults {
+  memberForces: {
+    [memberId: string]: number;
+  };
   reactionForces: {
     [nodeId: string]: ReactionForces;
   };
-  // Add other analysis result properties if needed
+  isStable: boolean;
 }
 
 // Statistics for truss structure

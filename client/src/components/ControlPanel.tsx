@@ -114,10 +114,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 
           {/* Load Application */}
           <div className="mb-6">
-            <h3 className="font-medium mb-2 text-lg">Load</h3>
+            <h3 className="font-medium mb-2 text-lg">Load  <span className="material-icons mr-2">arrow_downward</span></h3>
             <div className="space-y-2">
               <div className="flex items-center">
-                <span className="material-icons mr-2">arrow_downward</span>
                 <span>Magnitude (kN):</span>
                 <Input
                   type="number"
@@ -131,7 +130,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 />
               </div>
               <div className="flex items-center">
-                <span className="material-icons mr-2">angle</span>
+                {/* <span className="material-icons mr-2">angle</span> */}
                 <span>Angle (°):</span>
                 <Input
                   type="number"

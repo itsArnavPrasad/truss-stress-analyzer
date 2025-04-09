@@ -130,7 +130,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 />
               </div>
               <div className="flex items-center">
-                {/* <span className="material-icons mr-2">angle</span> */}
                 <span>Angle (°):</span>
                 <Input
                   type="number"

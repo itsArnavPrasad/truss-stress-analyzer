@@ -17,7 +17,7 @@ interface TrussCanvasProps {
   onNodePositionUpdated: (nodeId: string, x: number, y: number) => void;
   onNodeDeleted: (nodeId: string) => void;
   onMemberDeleted: (memberId: string) => void;
-  onNodeSupportSet: (nodeId: string, supportType: 'fixed' | 'hinged' | 'roller' | null) => void;
+  onNodeSupportSet: (nodeId: string, supportType: 'hinged' | 'roller' | null) => void;
   onNodeLoadApplied: (nodeId: string) => void;
   onFirstNodeForMemberSet: (node: TrussNode | null) => void;
   onEditNodeCoordinates?: (node: TrussNode) => void;

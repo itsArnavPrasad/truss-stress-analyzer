@@ -6,6 +6,7 @@ import HelpModal from "@/components/modals/HelpModal";
 import ErrorModal from "@/components/modals/ErrorModal";
 import CoordinateInputModal from "@/components/modals/CoordinateInputModal";
 import { 
+  TrussNodeSupport,
   TrussNode, 
   TrussMember, 
   Mode, 
@@ -126,7 +127,7 @@ export default function Home() {
     }));
   };
 
-  const setSupportToNode = (nodeId: string, supportType: 'fixed' | 'hinged' | null) => {
+  const setSupportToNode = (nodeId: string, supportType: TrussNodeSupport) => {
     setNodes(nodes.map(node => 
       node.id === nodeId ? { ...node, support: supportType } : node
     ));

@@ -14,7 +14,7 @@ interface ControlPanelProps {
   onClearAll: () => void;
   onAddNodeByCoordinates?: () => void;
   onResetView?: () => void;
-  analysisResults?: AnalysisResults;
+  analysisResults?: AnalysisResults | null;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({

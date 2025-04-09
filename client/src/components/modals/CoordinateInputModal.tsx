@@ -38,12 +38,11 @@ const CoordinateInputModal: React.FC<CoordinateInputModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-medium">{title}</DialogTitle>
           <DialogDescription>
-            Enter coordinates in engineering units (1 unit = 100 pixels on screen).
-            Positive Y is upward.
+            Enter coordinates in engineering units.
           </DialogDescription>
         </DialogHeader>
         
@@ -83,7 +82,7 @@ const CoordinateInputModal: React.FC<CoordinateInputModalProps> = ({
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-primary text-white">
+            <Button type="submit" variant="outline" >
               Confirm
             </Button>
           </DialogFooter>

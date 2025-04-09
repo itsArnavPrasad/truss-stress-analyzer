@@ -220,16 +220,7 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
         .attr('r', 8)
         .attr('fill', node === selectedNode ? '#FF9800' : '#424242');
 
-      if (node.support === 'fixed') {
-        nodeGroup.append('rect')
-          .attr('x', -12)
-          .attr('y', -12)
-          .attr('width', 24)
-          .attr('height', 24)
-          .attr('fill', 'none')
-          .attr('stroke', '#424242')
-          .attr('stroke-width', 2);
-      } else if (node.support === 'hinged') {
+      if (node.support === 'hinged') {
         nodeGroup.append('circle')
           .attr('r', 12)
           .attr('fill', 'none')

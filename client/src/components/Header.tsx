@@ -6,18 +6,19 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onHelpClick }) => {
   return (
-    <header className="bg-primary text-white p-4 shadow-md z-10">
-      <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl text-black font-medium ">2D Truss Stress Visualizer</h1>
-        <div className="flex items-center space-x-4">
-          <button 
-            onClick={onHelpClick}
-            className="flex items-center bg-neutral-400 rounded px-3 py-1 hover:bg-neutral-800 transition"
-          >
-            <span className="material-icons mr-1">help_outline</span>
-            <span>Help</span>
-          </button>
-        </div>
+    <header className="bg-primary text-white py-4 px-6 shadow-md z-10">
+      <div className="flex items-center justify-between">
+        {/* Left - Title */}
+        <h1 className="text-3xl font-semibold text-black">2D Truss Stress Visualizer</h1>
+
+        {/* Right - Help Button */}
+        <button 
+          onClick={onHelpClick}
+          className="flex items-center gap-2 bg-neutral-400 text-white font-medium rounded-lg px-4 py-2 hover:bg-neutral-600 transition-all"
+        >
+          <span className="material-icons">help_outline</span>
+          <span>Help</span>
+        </button>
       </div>
     </header>
   );

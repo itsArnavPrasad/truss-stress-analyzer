@@ -2,7 +2,6 @@ import React from 'react';
 import { Mode, LoadSettings, TrussStats } from '@/lib/trussTypes';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 
 interface ControlPanelProps {

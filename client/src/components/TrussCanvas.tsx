@@ -114,13 +114,14 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
     svg.selectAll('*').remove();
   
     // Layers
-    const gridLayer = svg.append('g').attr('class', 'grid-layer');
-    const membersLayer = svg.append('g').attr('class', 'members-layer');
-    const nodesLayer = svg.append('g').attr('class', 'nodes-layer');
-    const labelsLayer = svg.append('g').attr('class', 'labels-layer');
-    const supportLayer = svg.append('g').attr('class', 'support-layer');
-    const reactionForcesLayer = svg.append('g').attr('class', 'reaction-forces-layer');
     const mainGroup = svg.append('g').attr('class', 'main-group').attr('transform', transform.toString());
+    const gridLayer = mainGroup.append('g').attr('class', 'grid-layer');
+    const membersLayer = mainGroup.append('g').attr('class', 'members-layer');
+    const labelsLayer = mainGroup.append('g').attr('class', 'labels-layer');
+    const supportLayer = mainGroup.append('g').attr('class', 'support-layer');
+    const nodesLayer = mainGroup.append('g').attr('class', 'nodes-layer');
+    // const reactionForcesLayer = svg.append('g').attr('class', 'reaction-forces-layer');
+    
   
     // Draw Grid
     const gridSize = 20;
@@ -128,7 +129,7 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
     const gridHeight = size.height * 3;
   
     for (let x = -gridWidth; x <= gridWidth; x += gridSize) {
-      mainGroup.append('line')
+      gridLayer.append('line')
         .attr('class', 'grid-line')
         .attr('x1', x).attr('y1', -gridHeight)
         .attr('x2', x).attr('y2', gridHeight)
@@ -136,7 +137,7 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
     }
   
     for (let y = -gridHeight; y <= gridHeight; y += gridSize) {
-      mainGroup.append('line')
+      gridLayer.append('line')
         .attr('class', 'grid-line')
         .attr('x1', -gridWidth).attr('y1', y)
         .attr('x2', gridWidth).attr('y2', y)
@@ -144,8 +145,8 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
     }
   
     // Axis lines
-    mainGroup.append('line').attr('x1', 0).attr('y1', -gridHeight).attr('x2', 0).attr('y2', gridHeight).attr('stroke', '#BDBDBD').attr('stroke-width', 2);
-    mainGroup.append('line').attr('x1', -gridWidth).attr('y1', 0).attr('x2', gridWidth).attr('y2', 0).attr('stroke', '#BDBDBD').attr('stroke-width', 2);
+    gridLayer.append('line').attr('x1', 0).attr('y1', -gridHeight).attr('x2', 0).attr('y2', gridHeight).attr('stroke', '#BDBDBD').attr('stroke-width', 2);
+    gridLayer.append('line').attr('x1', -gridWidth).attr('y1', 0).attr('x2', gridWidth).attr('y2', 0).attr('stroke', '#BDBDBD').attr('stroke-width', 2);
   
     // Draw Members
     members.forEach(member => {
@@ -154,7 +155,7 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
           : analysisResults.memberForces[member.id] > 0 ? '#F44336' : '#2196F3'
         : '#424242';
   
-      const line = mainGroup.append('line')
+      const line = membersLayer.append('line')
         .attr('class', 'member')
         .attr('x1', member.node1.x).attr('y1', member.node1.y)
         .attr('x2', member.node2.x).attr('y2', member.node2.y)
@@ -182,12 +183,12 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
       const offsetY = -dx * 0.1;
   
       // Length Label
-      mainGroup.append('rect')
+      labelsLayer.append('rect')
         .attr('x', midX + offsetX - 25).attr('y', midY + offsetY - 10)
         .attr('width', 50).attr('height', 20)
         .attr('fill', 'white').attr('opacity', 0.8).attr('rx', 3);
   
-      mainGroup.append('text')
+      labelsLayer.append('text')
         .attr('class', 'length-label')
         .attr('x', midX + offsetX).attr('y', midY + offsetY + 4)
         .attr('text-anchor', 'middle')
@@ -198,12 +199,12 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
       // Force Label
       if (analysisResults?.memberForces[member.id] !== undefined) {
         const force = analysisResults.memberForces[member.id];
-        mainGroup.append('rect')
+        labelsLayer.append('rect')
           .attr('x', midX - 25).attr('y', midY - 10)
           .attr('width', 50).attr('height', 20)
           .attr('fill', 'white').attr('opacity', 0.8).attr('rx', 3);
   
-        mainGroup.append('text')
+        labelsLayer.append('text')
           .attr('class', 'force-label')
           .attr('x', midX).attr('y', midY + 4)
           .attr('text-anchor', 'middle')
@@ -216,7 +217,7 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
   
     // Draw Nodes
     nodes.forEach(node => {
-      const group = mainGroup.append('g')
+      const group = nodesLayer.append('g')
         .attr('class', 'node-group')
         .attr('transform', `translate(${node.x}, ${node.y})`)
         .style('cursor', mode === 'select' ? 'move' : 'pointer');
@@ -351,7 +352,7 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
     svg.on('click', (event: MouseEvent) => {
       if (mode !== 'addNode') return;
       if ((event.target as Element).closest('.node-group, .member')) return;
-      const point = d3.pointer(event, mainGroup.node());
+      const point = d3.pointer(event, nodesLayer.node());
       onNodeAdded(point[0], point[1]);
     });
   
@@ -367,10 +368,10 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
     // Temporary Line for Add Member
     if (firstNodeForMember && mode === 'addMember') {
       const mouseMoveHandler = (event: MouseEvent) => {
-        const [x, y] = d3.pointer(event, mainGroup.node());
-        const tempLine = mainGroup.select('.temporary-line');
+        const [x, y] = d3.pointer(event, gridLayer.node());
+        const tempLine = gridLayer.select('.temporary-line');
         if (tempLine.empty()) {
-          mainGroup.append('line')
+          gridLayer.append('line')
             .attr('class', 'temporary-line')
             .attr('stroke', '#999').attr('stroke-width', 2)
             .attr('x1', firstNodeForMember.x).attr('y1', firstNodeForMember.y)

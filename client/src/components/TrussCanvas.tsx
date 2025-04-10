@@ -78,35 +78,22 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
     const centerX = containerWidth / 4;
     const centerY = containerHeight * 3 / 4;
     
-    // Create and configure zoom behavior
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.1, 5]);
-    
-    // Select SVG and apply smooth transition
-    const svg = d3.select(svgRef.current);
-    svg.transition()
-      .duration(750)
-      .call(
-        zoom.transform,
-        d3.zoomIdentity
-          .translate(centerX, centerY)
-          .scale(1)
-      );
-    
     // Update transform state
     setTransform(d3.zoomIdentity.translate(centerX, centerY).scale(1));
+    const zoom = d3.zoom<SVGSVGElement, unknown>()
+    .scaleExtent([0.1, 5]);
+    // Apply transform using zoom
+    const svg = d3.select(svgRef.current);
+    svg.call(zoom.transform, d3.zoomIdentity.translate(centerX, centerY).scale(1));
   };
+
   useEffect(() => {
     if (!svgRef.current || !containerRef.current) return;
 
     const updateSize = () => {
       if (containerRef.current) setSize({ width: containerRef.current.clientWidth, height: containerRef.current.clientHeight });
       if (!svgRef.current || !containerRef.current) return;
-      const containerWidth = containerRef.current.clientWidth;
-      const containerHeight = containerRef.current.clientHeight;
-      const centerX = containerWidth / 4;
-      const centerY = containerHeight * 3 / 4;
-      setTransform(d3.zoomIdentity.translate(centerX, centerY).scale(1));
+      resetViewToCenter();
     };
 
     updateSize();
@@ -246,16 +233,7 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
         .attr('r', 8)
         .attr('fill', node === selectedNode ? '#FF9800' : '#424242');
   
-      // Supports
-      // if (node.support === 'hinged') {
-      //   group.append('circle').attr('r', 12).attr('fill', 'none').attr('stroke', '#424242').attr('stroke-width', 2);
-      // } else if (node.support === 'roller') {
-      //   group.append('path')
-      //     .attr('d', 'M-10,0 L0,-15 L10,0 Z')
-      //     .attr('fill', 'none').attr('stroke', '#000').attr('stroke-width', 2);
-      //   group.append('circle').attr('cx', -5).attr('cy', 5).attr('r', 3).attr('fill', '#000');
-      //   group.append('circle').attr('cx', 5).attr('cy', 5).attr('r', 3).attr('fill', '#000');
-      // }
+      // Draw support symbols
       if (node.support === 'hinged') {
         // Draw a triangle for hinged support (offset downward by 4 pixels)
         group.append('path')

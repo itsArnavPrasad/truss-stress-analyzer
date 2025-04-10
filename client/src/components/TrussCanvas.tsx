@@ -67,12 +67,6 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
     return modeName.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
   };
 
-  // const resetViewToCenter = () => {
-  //   if (!svgRef.current) return;
-  //   const svg = d3.select(svgRef.current);
-  //   const zoom = d3.zoom<SVGSVGElement, unknown>();
-  //   svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(size.width / 2, size.height / 2).scale(1));
-  // };
   const resetViewToCenter = () => {
     if (!svgRef.current || !containerRef.current) return;
     
@@ -81,8 +75,8 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
     const containerHeight = containerRef.current.clientHeight;
     
     // Calculate center position
-    const centerX = containerWidth / 2;
-    const centerY = containerHeight / 2;
+    const centerX = containerWidth / 4;
+    const centerY = containerHeight * 3 / 4;
     
     // Create and configure zoom behavior
     const zoom = d3.zoom<SVGSVGElement, unknown>()

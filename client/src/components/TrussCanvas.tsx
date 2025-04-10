@@ -56,7 +56,6 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
       case 'addNode': return "Click on the canvas to add a new node.";
       case 'addMember': return firstNodeForMember ? "Click a second node to create a member." : "Click the first node to start a member.";
       case 'delete': return "Click a node or member to delete it.";
-      case 'fixedSupport': return "Click a node to set as fixed support.";
       case 'hingedSupport': return "Click a node to set as hinged support.";
       case 'rollerSupport': return "Click a node to set as roller support.";
       case 'applyLoad': return "Click a node to apply/remove a load at the specified angle.";
@@ -68,13 +67,41 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
     return modeName.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
   };
 
+  // const resetViewToCenter = () => {
+  //   if (!svgRef.current) return;
+  //   const svg = d3.select(svgRef.current);
+  //   const zoom = d3.zoom<SVGSVGElement, unknown>();
+  //   svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(size.width / 2, size.height / 2).scale(1));
+  // };
   const resetViewToCenter = () => {
-    if (!svgRef.current) return;
+    if (!svgRef.current || !containerRef.current) return;
+    
+    // Get the current container dimensions
+    const containerWidth = containerRef.current.clientWidth;
+    const containerHeight = containerRef.current.clientHeight;
+    
+    // Calculate center position
+    const centerX = containerWidth / 2;
+    const centerY = containerHeight / 2;
+    
+    // Create and configure zoom behavior
+    const zoom = d3.zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.1, 5]);
+    
+    // Select SVG and apply smooth transition
     const svg = d3.select(svgRef.current);
-    const zoom = d3.zoom<SVGSVGElement, unknown>();
-    svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(size.width / 2, size.height / 2).scale(1));
+    svg.transition()
+      .duration(750)
+      .call(
+        zoom.transform,
+        d3.zoomIdentity
+          .translate(centerX, centerY)
+          .scale(1)
+      );
+    
+    // Update transform state
+    setTransform(d3.zoomIdentity.translate(centerX, centerY).scale(1));
   };
-
   useEffect(() => {
     if (!svgRef.current || !containerRef.current) return;
 

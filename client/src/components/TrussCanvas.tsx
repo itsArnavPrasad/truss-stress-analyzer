@@ -101,6 +101,12 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
 
     const updateSize = () => {
       if (containerRef.current) setSize({ width: containerRef.current.clientWidth, height: containerRef.current.clientHeight });
+      if (!svgRef.current || !containerRef.current) return;
+      const containerWidth = containerRef.current.clientWidth;
+      const containerHeight = containerRef.current.clientHeight;
+      const centerX = containerWidth / 4;
+      const centerY = containerHeight * 3 / 4;
+      setTransform(d3.zoomIdentity.translate(centerX, centerY).scale(1));
     };
 
     updateSize();

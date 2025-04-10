@@ -128,15 +128,17 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
     const gridWidth = size.width * 3;
     const gridHeight = size.height * 3;
   
-    for (let x = -gridWidth; x <= gridWidth; x += gridSize) {
+    // Vertical grid lines
+    for (let x = Math.ceil(-gridWidth / gridSize) * gridSize; x <= gridWidth; x += gridSize) {
       gridLayer.append('line')
         .attr('class', 'grid-line')
         .attr('x1', x).attr('y1', -gridHeight)
         .attr('x2', x).attr('y2', gridHeight)
         .attr('stroke', '#E0E0E0').attr('stroke-width', 1);
     }
-  
-    for (let y = -gridHeight; y <= gridHeight; y += gridSize) {
+
+    // Horizontal grid lines
+    for (let y = Math.ceil(-gridHeight / gridSize) * gridSize; y <= gridHeight; y += gridSize) {
       gridLayer.append('line')
         .attr('class', 'grid-line')
         .attr('x1', -gridWidth).attr('y1', y)
@@ -144,6 +146,8 @@ const TrussCanvas: React.FC<TrussCanvasProps> = ({
         .attr('stroke', '#E0E0E0').attr('stroke-width', 1);
     }
   
+
+
     // Axis lines
     gridLayer.append('line').attr('x1', 0).attr('y1', -gridHeight).attr('x2', 0).attr('y2', gridHeight).attr('stroke', '#BDBDBD').attr('stroke-width', 2);
     gridLayer.append('line').attr('x1', -gridWidth).attr('y1', 0).attr('x2', gridWidth).attr('y2', 0).attr('stroke', '#BDBDBD').attr('stroke-width', 2);

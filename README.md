@@ -10,7 +10,6 @@ This application allows engineers, students, and professionals to:
 - Apply loads to nodes at specified magnitudes
 - Calculate and visualize member forces and reaction forces
 - Check static determinacy and structural stability
-- Export analysis results to PDF
 
 ## Features
 
@@ -21,7 +20,6 @@ This application allows engineers, students, and professionals to:
 - **Precise Coordinate Input**: Add nodes with exact coordinates for precise modeling
 - **Force Analysis**: Calculate member forces using the finite element method
 - **Reaction Forces**: View support reaction forces with vectors
-- **Export Capability**: Save your truss design and analysis results as PDF
 
 ## Engineering Principles
 
@@ -61,7 +59,6 @@ The application uses the finite element method to analyze trusses:
 - D3.js for interactive visualization
 - TypeScript for type-safe code
 - Express.js for the server
-- HTML2Canvas and jsPDF for PDF export
 - ShadCN UI components
 
 ## Setup and Running
@@ -96,7 +93,6 @@ The application uses the finite element method to analyze trusses:
 4. **Apply Loads**: Click "Apply Load", adjust the magnitude, and click on nodes to apply loads
 5. **Analyze Truss**: Click "Calculate" to perform the analysis
 6. **View Results**: See member forces and reaction forces displayed on the canvas
-7. **Export**: Click "Export" to save your design and results as a PDF
 
 ## License
 

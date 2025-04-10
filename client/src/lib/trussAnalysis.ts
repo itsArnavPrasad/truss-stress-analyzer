@@ -14,18 +14,18 @@ function calculateLength(node1: TrussNode, node2: TrussNode): number {
 
 export function calculateTrussForces(nodes: TrussNode[], members: TrussMember[]): AnalysisResults {
   const nodeCount = nodes.length;
-  const dof = nodeCount * 2;
+  const dof = nodeCount * 2; // 2 degree of freedom for each node
   
-  const K = Array(dof).fill(0).map(() => Array(dof).fill(0));
-  const F = Array(dof).fill(0);
+  const K = Array(dof).fill(0).map(() => Array(dof).fill(0)); // global stiffness matrix
+  const F = Array(dof).fill(0); // force vector
   
   members.forEach(member => {
     const node1Index = nodes.findIndex(n => n.id === member.node1.id);
     const node2Index = nodes.findIndex(n => n.id === member.node2.id);
     const angle = calculateAngle(member.node1, member.node2);
     const length = calculateLength(member.node1, member.node2);
-    const E = 200000; // Young's modulus (MPa)
-    const A = 1000;   // Cross-sectional area (mm²)
+    const E = 200000; // Young's modulus (MPa) // doesnt matter for this project
+    const A = 1000;   // Cross-sectional area (mm²) // doesnt matter for this project
     const k = (E * A) / length;
     
     const c = Math.cos(angle);
@@ -77,7 +77,8 @@ export function calculateTrussForces(nodes: TrussNode[], members: TrussMember[])
   
   const n = reducedK.length;
   const d = Array(n).fill(0);
-  
+
+  // forward elimination for gaussian elimination
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
       const factor = reducedK[j][i] / reducedK[i][i];
@@ -85,7 +86,8 @@ export function calculateTrussForces(nodes: TrussNode[], members: TrussMember[])
       reducedF[j] -= factor * reducedF[i];
     }
   }
-  
+
+  // backward substitution for gaussian elimination
   for (let i = n - 1; i >= 0; i--) {
     let sum = 0;
     for (let j = i + 1; j < n; j++) sum += reducedK[i][j] * d[j];
@@ -117,6 +119,7 @@ export function calculateTrussForces(nodes: TrussNode[], members: TrussMember[])
     if (node.support) {
       const rx = fixedDOF.includes(i * 2) ? 
         F[i * 2] - freeDOF.map(j => K[i * 2][j] * d[freeDOF.indexOf(j)]).reduce((a, b) => a + b, 0) : 0;
+        
       const ry = fixedDOF.includes(i * 2 + 1) ?
         F[i * 2 + 1] - freeDOF.map(j => K[i * 2 + 1][j] * d[freeDOF.indexOf(j)]).reduce((a, b) => a + b, 0) : 0;
       reactionForces[node.id] = { x: rx, y: ry };
